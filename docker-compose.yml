@@ -1,48 +1,71 @@
+# Define la versión del esquema de docker-compose
 version: '3.8'
 
 services:
   nginx:
+# Utiliza la imagen oficial de Nginx en su versión alpine, una versión ligera basada en Alpine Linux.
     image: nginx:alpine
+# Asigna el nombre web al contenedor para facilitar su identificación.
     container_name: web
+# Expone el puerto 80 del contenedor en el puerto 80 del host, permitiendo acceder al servidor Nginx desde el navegador (http://localhost).
     ports:
       - "80:80"
     volumes:
+# monta el archivo local nginx.conf en el contenedor en la ruta /etc/nginx/nginx.conf como solo lectura (ro). 
+# Esto permite personalizar la configuración de Nginx.
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+# Indica que este servicio debe esperar a que el servicio nestjs esté listo antes de iniciar.
     depends_on:
       - nestjs
+# Conecta el contenedor a la red definida como app-network.
     networks:
       - app-network
 
   nestjs:
     build:
+# Especifica el directorio actual como contexto de construcción del Dockerfile.
       context: .
+# Indica el archivo Dockerfile a usar para construir la imagen del servicio.
       dockerfile: Dockerfile
+# Nombra al contenedor como backend.
     container_name: backend
+# Expone el puerto 3000 dentro de la red interna de Docker, permitiendo que otros servicios se comuniquen con este puerto.
     expose:
       - "3000"
     environment:
+# Define la variable de entorno MONGODB_URI que se usará para conectar a la base de datos MongoDB.
       - MONGODB_URI=mongodb://mongodb:27017/nestjs
+# Indica que este servicio debe esperar a que mongodb esté listo antes de iniciar.
     depends_on:
       - mongodb
     volumes:
+# monta el directorio actual en el contenedor en la ruta /app.
       - .:/app
+# asegura que la carpeta node_modules dentro del contenedor no sea montada, evitando problemas con dependencias locales.
       - /app/node_modules
+# Conecta el contenedor a app-network.
     networks:
       - app-network
 
   mongodb:
+# Utiliza la imagen oficial de MongoDB en la versión 8.0.3.
     image: mongo:8.0.3
+# Nombra al contenedor como data_base.
     container_name: data_base
+# Expone el puerto 27017 del contenedor en el puerto 27017 del host para acceder a MongoDB localmente.
     ports:
       - "27017:27017"
     volumes:
+# utiliza un volumen persistente llamado mongodb_data para almacenar los datos de MongoDB.
       - mongodb_data:/data/db
+# Conecta el contenedor a app-network.
     networks:
       - app-network
-
+# Define el volumen persistente mongodb_data para almacenar datos de MongoDB, asegurando que los datos no se pierdan al reiniciar el contenedor.
 volumes:
   mongodb_data:
-
+# Crea una red llamada app-network utilizando el controlador bridge. 
+# Esta red permite la comunicación entre los contenedores.
 networks:
   app-network:
     driver: bridge
