@@ -35,6 +35,8 @@ git clone https://github.com/HidalgoKevin/app-template-nestjs.git
 cd app-template-nestjs
 ```
 
+**Importante**: En el archivo **docker-compose.yml** esta seteado **version: '3.8'** que hace referencia a la version de docker, verificar que tu pc tenga una version de docker igual o superior o de lo contrario reportara un error que impedira avanzar.
+
 Una vez dentro de la carpeta se debe ejecutar el siguiente comando que realizara la creacion de los contenedores.
 
 ```bash
